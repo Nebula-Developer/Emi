@@ -28,6 +28,12 @@ public static class Program
             return new(hwnd);
         }
 
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            nint nsWindow = SDL3.SDL_GetPointerProperty(props, SDL3.SDL_PROP_WINDOW_COCOA_WINDOW_POINTER, 0);
+            return new(nsWindow);
+        }
+
         return new(nint.Zero);
     }
 
@@ -68,7 +74,7 @@ public static class Program
         var window = SDL3.SDL_CreateWindow("BGFX with SDL3",
             1080,
             720,
-            SDL_WindowFlags.SDL_WINDOW_RESIZABLE | SDL_WindowFlags.SDL_WINDOW_VULKAN);
+            SDL_WindowFlags.SDL_WINDOW_RESIZABLE);
 
         if (window == null)
             throw new Exception("Failed to create SDL window");
