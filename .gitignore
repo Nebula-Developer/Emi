@@ -5,6 +5,7 @@
 
 # native build files
 tools/
+runtimes/
 resources/**/*.bin
 
 # dotenv files

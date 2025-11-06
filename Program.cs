@@ -1,73 +1,78 @@
-﻿using Bgfx = BgfxCS.Bgfx;
+﻿using Emi.Graphics.BgfxCS;
 using System.Security.AccessControl;
 using SDL;
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 using System.Data;
 
-public struct NativeWindowHandle
-{
+public struct NativeWindowHandle {
     public nint Nwh;
     public nint Ndt;
 
-    public NativeWindowHandle(nint nwh, nint ndt = default)
-    {
+    public NativeWindowHandle(nint nwh, nint ndt = default) {
         Nwh = nwh;
         Ndt = ndt;
     }
 }
 
-public static class Program
-{
-    public static unsafe NativeWindowHandle GetNativeWindowHandle(SDL_Window* window)
-    {
+public static class Program {
+    public static unsafe NativeWindowHandle GetNativeWindowHandle(SDL_Window* window) {
         var props = SDL3.SDL_GetWindowProperties(window);
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-        {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) {
             nint hwnd = SDL3.SDL_GetPointerProperty(props, SDL3.SDL_PROP_WINDOW_WIN32_HWND_POINTER, 0);
             return new(hwnd);
-        }
-
-        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-        {
+        } else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) {
             nint nsWindow = SDL3.SDL_GetPointerProperty(props, SDL3.SDL_PROP_WINDOW_COCOA_WINDOW_POINTER, 0);
             return new(nsWindow);
+        } else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) {
+            string? driver = SDL3.SDL_GetCurrentVideoDriver();
+            if (driver == "x11") {
+                nint xdisplay = SDL3.SDL_GetPointerProperty(SDL3.SDL_GetWindowProperties(window), SDL3.SDL_PROP_WINDOW_X11_DISPLAY_POINTER, 0);
+                long xwindow = SDL3.SDL_GetNumberProperty(SDL3.SDL_GetWindowProperties(window), SDL3.SDL_PROP_WINDOW_X11_WINDOW_NUMBER, 0);
+
+                if (xdisplay != nint.Zero && xwindow != 0)
+                    return new((nint)xwindow, xdisplay);
+            } else if (driver == "wayland") {
+                nint wlDisplay = SDL3.SDL_GetPointerProperty(SDL3.SDL_GetWindowProperties(window), SDL3.SDL_PROP_WINDOW_WAYLAND_DISPLAY_POINTER, 0);
+                nint wlSurface = SDL3.SDL_GetPointerProperty(SDL3.SDL_GetWindowProperties(window), SDL3.SDL_PROP_WINDOW_WAYLAND_SURFACE_POINTER, 0);
+
+                if (wlDisplay != nint.Zero && wlSurface != nint.Zero)
+                    return new(wlSurface, wlDisplay);
+            }
         }
+
+        Console.WriteLine("Warning: Unsupported platform for native window handle retrieval");
 
         return new(nint.Zero);
     }
 
-    public static unsafe Bgfx.Init CreateBgfxInit(SDL_Window* window)
-    {
+    public static unsafe BgfxInitConfig CreateBgfxInit(SDL_Window* window) {
         NativeWindowHandle handle = GetNativeWindowHandle(window);
 
-        var init = new Bgfx.Init();
-        Bgfx.init_ctor(&init);
+        var init = new BgfxInitConfig();
+        Bgfx.InitCtor(&init);
 
-        init.platformData = new Bgfx.PlatformData
-        {
+        init.platformData = new PlatformData {
             nwh = (void*)handle.Nwh,
             ndt = (void*)handle.Ndt,
-            type = Bgfx.NativeWindowHandleType.Count
+            type = NativeWindowHandleType.Count
         };
 
-        init.resolution = new Bgfx.Resolution
-        {
+        init.resolution = new RendererResolution {
             width = 1080,
             height = 720,
-            reset = (uint)Bgfx.ResetFlags.Vsync
+            reset = (uint)ResetFlags.Vsync
         };
 
         init.limits.maxEncoders = 4;
         init.limits.transientVbSize = 6 * 1024 * 1024;
         init.limits.transientIbSize = 2 * 1024 * 1024;
-        init.type = Bgfx.RendererType.Count;
+        init.type = RendererType.Count;
 
         return init;
     }
 
-    public static unsafe SDL_Window* Init()
-    {
+    public static unsafe SDL_Window* Init() {
         if (!SDL3.SDL_Init(SDL_InitFlags.SDL_INIT_VIDEO))
             throw new Exception("Failed to initialize SDL");
 
@@ -80,60 +85,59 @@ public static class Program
             throw new Exception("Failed to create SDL window");
 
         var init = CreateBgfxInit(window);
-        Bgfx.render_frame(0);
+        Bgfx.RenderFrame(0);
 
-        if (!Bgfx.init(&init))
+        if (!Bgfx.Init(&init))
             throw new Exception("Initialization failed");
 
         return window;
     }
 
-    public static unsafe void Main()
-    {
+    public static unsafe void Main() {
         var window = Init();
-
-        var renderer = Bgfx.get_renderer_type();
-        Console.WriteLine($"Using bgfx renderer: {renderer}");
 
         int width, height;
         SDL3.SDL_GetWindowSize(window, &width, &height);
 
-        Bgfx.reset((uint)width, (uint)height, (uint)Bgfx.ResetFlags.Vsync, Bgfx.TextureFormat.Count);
-        Bgfx.set_view_rect(0, 0, 0, (ushort)width, (ushort)height);
-        Bgfx.set_view_clear(0, (ushort)(Bgfx.ClearFlags.Color | Bgfx.ClearFlags.Depth), 0x303030ff, 1.0f, 0);
+        Bgfx.Reset((uint)width, (uint)height, (uint)ResetFlags.Vsync, TextureFormat.Count);
+        Bgfx.SetViewRect(0, 0, 0, (ushort)width, (ushort)height);
+        Bgfx.SetViewClear(0, (ushort)(ClearFlags.Color | ClearFlags.Depth), 0x303030ff, 1.0f, 0);
 
         SDL_Event* @event = stackalloc SDL_Event[1];
 
-        while (true)
-        {
+        var renderer = Bgfx.GetRendererType();
+
+        // Bgfx.
+        Console.WriteLine($"Using bgfx renderer: {renderer}");
+
+        while (true) {
             if (!SDL3.SDL_PollEvent(@event))
                 goto render;
 
             var type = (SDL_EventType)@event->type;
-            switch (type)
-            {
+            switch (type) {
                 case SDL_EventType.SDL_EVENT_QUIT:
                     goto end;
                 case SDL_EventType.SDL_EVENT_WINDOW_RESIZED:
                     var resizedEvent = @event->window;
-                    Bgfx.reset((uint)resizedEvent.data1, (uint)resizedEvent.data2, (uint)Bgfx.ResetFlags.Vsync, Bgfx.TextureFormat.Count);
-                    Bgfx.set_view_rect(0, 0, 0, (ushort)resizedEvent.data1, (ushort)resizedEvent.data2);
+                    Bgfx.Reset((uint)resizedEvent.data1, (uint)resizedEvent.data2, (uint)ResetFlags.Vsync, TextureFormat.Count);
+                    Bgfx.SetViewRect(0, 0, 0, (ushort)resizedEvent.data1, (ushort)resizedEvent.data2);
                     break;
                 case SDL_EventType.SDL_EVENT_WINDOW_CLOSE_REQUESTED:
                     goto end;
             }
 
         render:
-            Bgfx.touch(0);
+            Bgfx.Touch(0);
 
-            Bgfx.dbg_text_clear(0, false);
-            Bgfx.dbg_text_printf(0, 0, 0x0f, "Hello bgfx + SDL3!", "");
-            Bgfx.set_debug((uint)(Bgfx.DebugFlags.Text));
-            Bgfx.frame(false);
+            Bgfx.DbgTextClear(0, false);
+            Bgfx.DbgTextPrintf(0, 0, 0x0f, "Hello bgfx + SDL3!", "");
+            Bgfx.SetDebug((uint)(BgfxDebugFlags.Text | BgfxDebugFlags.Stats));
+            Bgfx.Frame(false);
         }
 
     end:
-        Bgfx.shutdown();
+        Bgfx.Shutdown();
     }
 }
 
