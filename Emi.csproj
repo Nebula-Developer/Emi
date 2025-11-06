@@ -7,31 +7,30 @@
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
-  
+
   <ItemGroup>
     <PackageReference Include="ppy.SDL3-CS" Version="2025.920.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="tools/bgfx.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <Link>bgfx.dll</Link>
-    </Content>
-
     <None Include="runtimes\**\*">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 
-  <PropertyGroup Condition="'$(OS)' == 'Unix'">
-    <DefineConstants>LINUX</DefineConstants>
+  <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('Windows'))">
+    <DefineConstants>WINDOWS;$(DefineConstants)</DefineConstants>
+    <PlatformName>Windows</PlatformName>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(OS)' == 'Windows'">
-    <DefineConstants>WINDOWS</DefineConstants>
+  <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('Linux'))">
+    <DefineConstants>LINUX;$(DefineConstants)</DefineConstants>
+    <PlatformName>Linux</PlatformName>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(OS)' == 'OSX'">
-    <DefineConstants>MACOS</DefineConstants>
+  <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('OSX'))">
+    <DefineConstants>OSX;$(DefineConstants)</DefineConstants>
+    <PlatformName>macOS</PlatformName>
   </PropertyGroup>
+
 </Project>

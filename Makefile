@@ -1,10 +1,10 @@
 all: init build
 
 init:
-    git submodule update --init --recursive
+	git submodule update --init --recursive
 
 update:
-    git submodule update --remote --merge
+	git submodule update --remote --merge
 
 build:
-    ./scripts/build_bgfx.sh
+	./scripts/build-bgfx.sh

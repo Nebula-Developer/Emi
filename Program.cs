@@ -55,18 +55,24 @@ public static class Program {
         init.platformData = new PlatformData {
             nwh = (void*)handle.Nwh,
             ndt = (void*)handle.Ndt,
+            backBuffer = null,
+            backBufferDS = null,
+            context = null,
             type = NativeWindowHandleType.Count
         };
+
+        init.vendorId = 0;
 
         init.resolution = new RendererResolution {
             width = 1080,
             height = 720,
-            reset = (uint)ResetFlags.Vsync
+            reset = (uint)ResetFlags.Vsync,
+            formatColor = TextureFormat.RGBA8
         };
 
         init.limits.maxEncoders = 4;
-        init.limits.transientVbSize = 6 * 1024 * 1024;
-        init.limits.transientIbSize = 2 * 1024 * 1024;
+        init.limits.maxTransientVbSize = 6 * 1024 * 1024;
+        init.limits.maxTransientIbSize = 2 * 1024 * 1024;
         init.type = RendererType.Count;
 
         return init;
