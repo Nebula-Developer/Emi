@@ -9,9 +9,8 @@ public partial class Element {
     /// Initializes a new instance of <see cref="Element"/>.
     /// </summary>
     public Element() {
-
+        Transform = CreateTransform();
     }
-
 
     /// <summary>
     /// A clear name primarily for debugging purposes.
