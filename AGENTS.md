@@ -57,4 +57,5 @@
 - Unit tests shouldn't just test "happy paths" but also edge cases and error conditions.
 - Make sure tests are isolated, and feel free to use unified setup/teardown methods for common initialization/cleanup. Do not duplicate code across tests.
 - Make sure tests work after your changes, and that they pass consistently.
-
+- The file structure in `Emi.Tests` should mirror that of `Emi` for easy navigation. Eg, any tests for `Emi/Core/Element_Composite.cs` should go in `Emi.Tests/Core/Element_Composite_Tests.cs`.
+- Test methods should be named clearly to indicate what they are testing, e.g., `MethodName_StateUnderTest_ExpectedBehavior`.

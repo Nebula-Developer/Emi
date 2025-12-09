@@ -1,6 +1,6 @@
 using Silk.NET.WebGPU;
 
-namespace Emi;
+namespace Emi.Graphics;
 
 public unsafe class Renderer(GPUContext context) {
     private readonly GPUContext _context = context;

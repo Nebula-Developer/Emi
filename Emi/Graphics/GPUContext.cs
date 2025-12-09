@@ -1,7 +1,7 @@
 using Silk.NET.Core.Native;
 using Silk.NET.WebGPU;
 
-namespace Emi;
+namespace Emi.Graphics;
 
 public unsafe class GPUContext {
 #nullable disable
