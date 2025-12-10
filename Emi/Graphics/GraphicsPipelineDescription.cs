@@ -12,9 +12,9 @@ public struct GraphicsPipelineDescription {
     public CompareFunction DepthCompare;
     public string VertexEntryPoint;
     public string FragmentEntryPoint;
-    
+
     // TODO: add BlendState
-    
+
     public static GraphicsPipelineDescription Default(Shader shader) {
         return new GraphicsPipelineDescription {
             Shader = shader,

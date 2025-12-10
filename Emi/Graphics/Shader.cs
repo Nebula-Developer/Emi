@@ -23,7 +23,7 @@ public unsafe class Shader : IDisposable {
         };
 
         Module = _context.WebGPU.DeviceCreateShaderModule(_context.Device, &shaderDesc);
-        
+
         SilkMarshal.Free((nint)wgslShaderDesc.Code);
     }
 

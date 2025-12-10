@@ -1,12 +1,11 @@
-using System;
+
 using System.Numerics;
+
+using Emi.Mathematics.Vectors;
 
 namespace Emi.Mathematics;
 
-/// <summary>
-/// Extension helpers for <see cref="IVector3{TSelf, TValue}"/> implementations.
-/// </summary>
-public static class Vector3Extensions {
+public static partial class MathE {
     /// <summary>
     /// Creates a copy of the vector with a new X component.
     /// </summary>
@@ -246,8 +245,77 @@ public static class Vector3Extensions {
         return normal.Multiply(scale);
     }
 
-    /// <inheritdoc cref="Vector3Math.Lerp{TSelf, TValue}(TSelf, TSelf, TValue)"/>
-    public static TSelf LerpTo<TSelf, TValue>(this TSelf vector, TSelf target, TValue amount)
+    /// <summary>
+    /// Returns the component-wise minimum of two vectors.
+    /// </summary>
+    /// <typeparam name="TSelf">Vector type</typeparam>
+    /// <typeparam name="TValue">Component type</typeparam>
+    /// <param name="vector">Left operand</param>
+    /// <param name="other">Right operand</param>
+    /// <returns>Component-wise minimum</returns>
+    public static TSelf Min<TSelf, TValue>(this IVector3<TSelf, TValue> vector, IVector3<TSelf, TValue> other)
         where TSelf : struct, IVector3<TSelf, TValue>
-        where TValue : INumber<TValue> => Vector3Math.Lerp(vector, target, amount);
+        where TValue : INumber<TValue> => TSelf.Create(
+        TValue.Min(vector.X, other.X),
+        TValue.Min(vector.Y, other.Y),
+        TValue.Min(vector.Z, other.Z));
+
+    /// <summary>
+    /// Returns the component-wise maximum of two vectors.
+    /// </summary>
+    /// <typeparam name="TSelf">Vector type</typeparam>
+    /// <typeparam name="TValue">Component type</typeparam>
+    /// <param name="vector">Left operand</param>
+    /// <param name="other">Right operand</param>
+    /// <returns>Component-wise maximum</returns>
+    public static TSelf Max<TSelf, TValue>(this IVector3<TSelf, TValue> vector, IVector3<TSelf, TValue> other)
+        where TSelf : struct, IVector3<TSelf, TValue>
+        where TValue : INumber<TValue> => TSelf.Create(
+        TValue.Max(vector.X, other.X),
+        TValue.Max(vector.Y, other.Y),
+        TValue.Max(vector.Z, other.Z));
+
+    /// <summary>
+    /// Computes the squared distance between two vectors.
+    /// </summary>
+    /// <typeparam name="TSelf">Vector type</typeparam>
+    /// <typeparam name="TValue">Component type</typeparam>
+    /// <param name="vector">First vector</param>
+    /// <param name="other">Second vector</param>
+    /// <returns>Squared distance</returns>
+    public static double DistanceSquared<TSelf, TValue>(this IVector3<TSelf, TValue> vector, IVector3<TSelf, TValue> other)
+        where TSelf : struct, IVector3<TSelf, TValue>
+        where TValue : INumber<TValue> {
+        TSelf delta = vector.Subtract(other);
+        return delta.LengthSquared<TSelf, TValue>();
+    }
+
+    /// <summary>
+    /// Computes the distance between two vectors.
+    /// </summary>
+    /// <typeparam name="TSelf">Vector type</typeparam>
+    /// <typeparam name="TValue">Component type</typeparam>
+    /// <param name="vector">First vector</param>
+    /// <param name="other">Second vector</param>
+    /// <returns>Distance</returns>
+    public static double Distance<TSelf, TValue>(this IVector3<TSelf, TValue> vector, IVector3<TSelf, TValue> other)
+        where TSelf : struct, IVector3<TSelf, TValue>
+        where TValue : INumber<TValue> => Math.Sqrt(vector.DistanceSquared(other));
+
+    /// <summary>
+    /// Linearly interpolates between two vectors with amount clamped between zero and one.
+    /// </summary>
+    /// <typeparam name="TSelf">Vector type</typeparam>
+    /// <typeparam name="TValue">Component type</typeparam>
+    /// <param name="vector">Start vector</param>
+    /// <param name="target">End vector</param>
+    /// <param name="amount">Interpolation amount</param>
+    /// <returns>Interpolated vector</returns>
+    public static TSelf Lerp<TSelf, TValue>(this TSelf vector, TSelf target, TValue amount)
+        where TSelf : struct, IVector3<TSelf, TValue>
+        where TValue : IFloatingPoint<TValue> {
+        TValue clamped = TValue.Clamp(amount, TValue.Zero, TValue.One);
+        TSelf delta = target.Subtract(vector);
+        return vector.Add(delta.Multiply(clamped));
+    }
 }

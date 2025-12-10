@@ -1,4 +1,5 @@
 using Silk.NET.WebGPU;
+
 using Buffer = Silk.NET.WebGPU.Buffer;
 
 namespace Emi.Graphics;
@@ -11,7 +12,7 @@ public unsafe class Mesh : IDisposable {
     public Mesh(GPUContext context, float[] vertices) {
         _context = context;
         CreateVertexBuffer(vertices);
-        VertexCount = (uint)(vertices.Length / 3); 
+        VertexCount = (uint)(vertices.Length / 3);
     }
 
     public Mesh(GPUContext context, float[] vertices, uint vertexCount) {
@@ -28,11 +29,11 @@ public unsafe class Mesh : IDisposable {
         };
 
         VertexBuffer = _context.WebGPU.DeviceCreateBuffer(_context.Device, &vertexBufferDesc);
-        
+
         void* mappedPtr = _context.WebGPU.BufferGetMappedRange(VertexBuffer, 0, (nuint)vertexBufferDesc.Size);
         for (int i = 0; i < vertices.Length; i++)
             ((float*)mappedPtr)[i] = vertices[i];
-        
+
         _context.WebGPU.BufferUnmap(VertexBuffer);
     }
 

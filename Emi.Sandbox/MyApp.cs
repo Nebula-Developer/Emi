@@ -1,7 +1,8 @@
-using Silk.NET.Core.Native;
-using Silk.NET.WebGPU;
-using Silk.NET.Maths;
 using Emi.Graphics;
+
+using Silk.NET.Core.Native;
+using Silk.NET.Maths;
+using Silk.NET.WebGPU;
 
 namespace Emi.Sandbox;
 
@@ -47,14 +48,14 @@ public unsafe class MyApp : Application {
         }";
 
         _shader = new Shader(Context, shaderSource);
-        
+
         var layout = new VertexLayout();
         layout.AddAttribute(VertexFormat.Float32x3, 0, 0); // Position
         layout.AddAttribute(VertexFormat.Float32x3, 1, 12); // Color
 
         var pipelineDesc = GraphicsPipelineDescription.Default(_shader);
         pipelineDesc.VertexLayout = layout;
-        
+
         _pipeline = new Pipeline(Context, pipelineDesc);
 
         _uniformBuffer = new UniformBuffer(Context, (ulong)sizeof(Matrix4X4<float>));
@@ -99,7 +100,7 @@ public unsafe class MyApp : Application {
 
     protected override void OnRender(double delta) {
         base.OnRender(delta);
-        
+
         if (_pipeline == null || _triangleMesh == null || _squareMesh == null || _uniformBuffer == null) return;
 
         _camera.UpdateProjection(Window.Size.X, Window.Size.Y);

@@ -16,7 +16,7 @@ public class VertexLayout {
             ShaderLocation = shaderLocation,
             Offset = offset
         });
-        
+
         uint end = offset + GetSize(format);
         if (end > Stride) Stride = end;
     }

@@ -1,7 +1,8 @@
 using System;
-using System.Numerics;
 
-namespace Emi.Mathematics;
+using Emi.Mathematics;
+
+namespace Emi.Mathematics.Vectors;
 
 /// <summary>
 /// Integer three-dimensional vector.
@@ -28,6 +29,17 @@ public readonly record struct Vector3i : IVector3<Vector3i, int> {
         Z = z;
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Vector3i"/> struct with all
+    /// components set to the same scale value.
+    /// </summary>
+    /// <param name="scale">Value to assign to X, Y and Z.</param>
+    public Vector3i(int scale) {
+        X = scale;
+        Y = scale;
+        Z = scale;
+    }
+
     /// <inheritdoc cref="Vector3.Zero" />
     public static Vector3i Zero { get; } = new Vector3i(0, 0, 0);
 
@@ -48,18 +60,6 @@ public readonly record struct Vector3i : IVector3<Vector3i, int> {
 
     /// <inheritdoc cref="Vector3.Magnitude" />
     public double Magnitude => this.Length();
-
-    /// <summary>
-    /// Converts this vector to single precision.
-    /// </summary>
-    /// <returns>Single-precision vector</returns>
-    public Vector3 ToSingle() => new Vector3(X, Y, Z);
-
-    /// <summary>
-    /// Converts this vector to double precision.
-    /// </summary>
-    /// <returns>Double-precision vector</returns>
-    public Vector3d ToDouble() => new Vector3d(X, Y, Z);
 
     /// <summary>
     /// Deconstructs the vector into individual components.
@@ -99,9 +99,6 @@ public readonly record struct Vector3i : IVector3<Vector3i, int> {
     /// <inheritdoc cref="Vector3.operator -(Vector3,Vector3)" />
     public static Vector3i operator -(Vector3i left, Vector3i right) => left.Subtract(right);
 
-    /// <inheritdoc cref="Vector3.operator *(Vector3,Vector3)" />
-    public static Vector3i operator *(Vector3i left, Vector3i right) => left.Cross(right);
-
     /// <inheritdoc cref="Vector3.operator *(Vector3,float)" />
     public static Vector3i operator *(Vector3i left, int scalar) => left.Multiply(scalar);
 
@@ -119,4 +116,41 @@ public readonly record struct Vector3i : IVector3<Vector3i, int> {
 
     /// <inheritdoc />
     public override string ToString() => $"Vector3i({X}, {Y}, {Z})";
+
+    public static implicit operator Vector3i(Vector3 value) => new Vector3i(
+        (int)MathF.Round(value.X, MidpointRounding.AwayFromZero),
+        (int)MathF.Round(value.Y, MidpointRounding.AwayFromZero),
+        (int)MathF.Round(value.Z, MidpointRounding.AwayFromZero));
+    public static implicit operator Vector3i(Vector3d value) => new Vector3i(
+        (int)Math.Round(value.X, MidpointRounding.AwayFromZero),
+        (int)Math.Round(value.Y, MidpointRounding.AwayFromZero),
+        (int)Math.Round(value.Z, MidpointRounding.AwayFromZero));
+
+    /// <summary>
+    /// Computes the dot product with another vector.
+    /// </summary>
+    /// <param name="other">Vector to dot against</param>
+    /// <returns>Dot product</returns>
+    public int Dot(Vector3i other) => this.Dot<Vector3i, int>(other);
+
+    /// <summary>
+    /// Returns a normalized version of this vector.
+    /// </summary>
+    public Vector3i Normalized => this.Normalize();
+
+    /// <summary>
+    /// Returns whether all components are finite. Always true for integers.
+    /// </summary>
+    public bool IsFinite => true;
+
+    #region Math Bridges
+    /// <inheritdoc cref="MathE.Min{TSelf,TValue}(IVector3{TSelf,TValue},IVector3{TSelf,TValue})"/>
+    public static Vector3i Min(Vector3i left, Vector3i right) => left.Min(right);
+
+    /// <inheritdoc cref="MathE.Max{TSelf,TValue}(IVector3{TSelf,TValue},IVector3{TSelf,TValue})"/>
+    public static Vector3i Max(Vector3i left, Vector3i right) => left.Max(right);
+
+    /// <inheritdoc cref="MathE.Clamp{TSelf,TValue}(IVector3{TSelf,TValue},IVector3{TSelf,TValue},IVector3{TSelf,TValue})"/>
+    public static Vector3i Clamp(Vector3i value, Vector3i min, Vector3i max) => value.Clamp(min, max);
+    #endregion
 }

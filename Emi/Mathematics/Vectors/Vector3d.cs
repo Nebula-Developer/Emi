@@ -1,7 +1,6 @@
-using System;
-using System.Numerics;
+using Emi.Mathematics;
 
-namespace Emi.Mathematics;
+namespace Emi.Mathematics.Vectors;
 
 /// <summary>
 /// Double-precision three-dimensional vector.
@@ -28,6 +27,17 @@ public readonly record struct Vector3d : IVector3<Vector3d, double> {
         Z = z;
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Vector3d"/> struct with all
+    /// components set to the same scale value.
+    /// </summary>
+    /// <param name="scale">Value to assign to X, Y and Z.</param>
+    public Vector3d(double scale) {
+        X = scale;
+        Y = scale;
+        Z = scale;
+    }
+
     /// <inheritdoc cref="Vector3.Zero" />
     public static Vector3d Zero { get; } = new Vector3d(0d, 0d, 0d);
 
@@ -49,41 +59,12 @@ public readonly record struct Vector3d : IVector3<Vector3d, double> {
     /// <inheritdoc cref="Vector3.Magnitude" />
     public double Magnitude => this.Length();
 
-    /// <summary>
-    /// Converts this vector to single precision.
-    /// </summary>
-    /// <returns>Single-precision vector</returns>
-    public Vector3 ToSingle() => new Vector3((float)X, (float)Y, (float)Z);
-
-    /// <summary>
-    /// Converts this vector to an integer vector by rounding components.
-    /// </summary>
-    /// <returns>Integer vector with rounded components</returns>
-    public Vector3i ToInt32() => new Vector3i((int)Math.Round(X), (int)Math.Round(Y), (int)Math.Round(Z));
-
-    /// <summary>
-    /// Deconstructs the vector into individual components.
-    /// </summary>
-    /// <param name="x">Component along the X axis</param>
-    /// <param name="y">Component along the Y axis</param>
-    /// <param name="z">Component along the Z axis</param>
+    /// <inheritdoc cref="Vector3.Deconstruct" />
     public void Deconstruct(out double x, out double y, out double z) {
         x = X;
         y = Y;
         z = Z;
     }
-
-    /// <summary>
-    /// Implicitly converts an integer vector to double precision.
-    /// </summary>
-    /// <param name="value">Integer vector to convert</param>
-    public static implicit operator Vector3d(Vector3i value) => new Vector3d(value.X, value.Y, value.Z);
-
-    /// <summary>
-    /// Implicitly converts a single-precision vector to double precision.
-    /// </summary>
-    /// <param name="value">Single-precision vector to convert</param>
-    public static implicit operator Vector3d(Vector3 value) => new Vector3d(value.X, value.Y, value.Z);
 
     /// <inheritdoc cref="Vector3.operator +(Vector3,Vector3)" />
     public static Vector3d operator +(Vector3d left, Vector3d right) => left.Add(right);
@@ -93,9 +74,6 @@ public readonly record struct Vector3d : IVector3<Vector3d, double> {
 
     /// <inheritdoc cref="Vector3.operator -(Vector3,Vector3)" />
     public static Vector3d operator -(Vector3d left, Vector3d right) => left.Subtract(right);
-
-    /// <inheritdoc cref="Vector3.operator *(Vector3,Vector3)" />
-    public static Vector3d operator *(Vector3d left, Vector3d right) => left.Cross(right);
 
     /// <inheritdoc cref="Vector3.operator *(Vector3,float)" />
     public static Vector3d operator *(Vector3d left, double scalar) => left.Multiply(scalar);
@@ -114,4 +92,38 @@ public readonly record struct Vector3d : IVector3<Vector3d, double> {
 
     /// <inheritdoc />
     public override string ToString() => $"Vector3d({X}, {Y}, {Z})";
+
+    public static implicit operator Vector3d(Vector3i value) => new Vector3d(value.X, value.Y, value.Z);
+    public static implicit operator Vector3d(Vector3 value) => new Vector3d(value.X, value.Y, value.Z);
+
+    /// <summary>
+    /// Computes the dot product with another vector.
+    /// </summary>
+    /// <param name="other">Vector to dot against</param>
+    /// <returns>Dot product</returns>
+    public double Dot(Vector3d other) => this.Dot<Vector3d, double>(other);
+
+    /// <summary>
+    /// Returns a normalized version of this vector.
+    /// </summary>
+    public Vector3d Normalized => this.Normalize<Vector3d, double>();
+
+    /// <summary>
+    /// Returns whether all components are finite (not NaN or Infinity).
+    /// </summary>
+    public bool IsFinite => double.IsFinite(X) && double.IsFinite(Y) && double.IsFinite(Z);
+
+    #region Math Bridges
+    /// <inheritdoc cref="MathE.Min{TSelf,TValue}(IVector3{TSelf,TValue},IVector3{TSelf,TValue})"/>
+    public static Vector3d Min(Vector3d left, Vector3d right) => left.Min(right);
+
+    /// <inheritdoc cref="MathE.Max{TSelf,TValue}(IVector3{TSelf,TValue},IVector3{TSelf,TValue})"/>
+    public static Vector3d Max(Vector3d left, Vector3d right) => left.Max(right);
+
+    /// <inheritdoc cref="MathE.Lerp{TSelf,TValue}(TSelf,TSelf,TValue)"/>
+    public static Vector3d Lerp(Vector3d a, Vector3d b, double t) => a.Lerp(b, t);
+
+    /// <inheritdoc cref="MathE.Clamp{TSelf,TValue}(IVector3{TSelf,TValue},IVector3{TSelf,TValue},IVector3{TSelf,TValue})"/>
+    public static Vector3d Clamp(Vector3d value, Vector3d min, Vector3d max) => value.Clamp(min, max);
+    #endregion
 }

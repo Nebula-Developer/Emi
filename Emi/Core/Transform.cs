@@ -15,5 +15,5 @@ public class Transform(Element owner) {
     /// <summary>
     /// The element that owns this transform.
     /// </summary>
-    public readonly Element Element = owner;    
+    public readonly Element Element = owner;
 }

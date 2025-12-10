@@ -134,7 +134,7 @@ public partial class Element {
     /// <param name="reverse">Whether to iterate in reverse order</param>
     public void ForEachChild(Action<Element, int> action, bool reverse = false) {
         var childrenSnapshot = _children.ToArray();
-        
+
         if (reverse) {
             for (int i = childrenSnapshot.Length - 1; i >= 0; i--)
                 action(childrenSnapshot[i], i);
@@ -166,7 +166,7 @@ public partial class Element {
 
         if (parent != null && parent.IsDescendantOf(this))
             throw new InvalidOperationException("An element cannot be assigned a descendant as its parent.");
-        
+
         oldParent = _parent;
         if (oldParent == parent) return false;
 

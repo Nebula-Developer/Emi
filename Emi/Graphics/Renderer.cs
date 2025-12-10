@@ -10,7 +10,7 @@ public unsafe class Renderer(GPUContext context) {
 
     public Color ClearColor = new(0f, 0f, 0f, 1f);
     public CommandEncoder* CurrentEncoder;
-    public RenderPassEncoder* CurrentPass;    
+    public RenderPassEncoder* CurrentPass;
 
     public void ConfigureSurface(uint width, uint height) {
         _config = new SurfaceConfiguration {

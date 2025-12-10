@@ -15,6 +15,6 @@ public partial class Element {
     protected virtual Transform CreateTransform() => new(this);
 
     #region Transform Properties
-    
+
     #endregion
 }

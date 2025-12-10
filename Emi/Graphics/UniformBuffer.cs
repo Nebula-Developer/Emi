@@ -1,4 +1,5 @@
 using Silk.NET.WebGPU;
+
 using Buffer = Silk.NET.WebGPU.Buffer;
 
 namespace Emi.Graphics;
@@ -27,7 +28,7 @@ public unsafe class UniformBuffer : IDisposable {
     public void Update<T>(T data) where T : unmanaged {
         _context.WebGPU.QueueWriteBuffer(_context.Queue, Buffer, 0, &data, (nuint)sizeof(T));
     }
-    
+
     public void Dispose() {
         if (Buffer != null) {
             _context.WebGPU.BufferRelease(Buffer);
